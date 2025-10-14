@@ -25,12 +25,12 @@ authApi.interceptors.request.use(
 // Auth methods
 export const authMethods = {
     register: async (email, password) => {
-        const response = await authApi.post('/auth/register', { email, password })
+        const response = await authApi.post('/register', { email, password })
         return response.data
     },
 
     login: async (email, password) => {
-        const response = await authApi.post('/auth/login', { email, password })
+        const response = await authApi.post('/login', { email, password })
         return response.data
     },
 }
