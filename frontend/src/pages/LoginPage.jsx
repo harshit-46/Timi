@@ -8,7 +8,7 @@ import {
     Alert,
     Grid
 } from '@mui/material';
-import authApi, { authMethods } from '../services/authApi';
+import { authMethods } from '../services/authApi';
 
 export default function LoginPage({ onLogin, onSwitchToRegister }) {
     const [email, setEmail] = useState('')
@@ -32,8 +32,8 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
     }
 
     return (
-        <Grid container spacing={4} sx={{ mt: 10 }}>
-            <Grid item xs={12} md={6}>
+        <Grid spacing={4} sx={{ mt: 10 }}>
+            <Grid>
                 <Box>
                     <Typography variant="h3" sx={{ mb: 2, fontWeight: 'bold', color: '#667eea' }}>
                         Timi
@@ -53,7 +53,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                 </Box>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid>
                 <Paper elevation={3} sx={{ p: 4 }}>
                     <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
                         Login
