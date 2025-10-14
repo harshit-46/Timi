@@ -6,11 +6,9 @@ import {
     Button,
     Typography,
     Alert,
-    Card,
-    CardContent,
     Grid
-} from '@mui/material'
-import { authApi } from '../services/authApi'
+} from '@mui/material';
+import authApi, { authMethods } from '../services/authApi';
 
 export default function LoginPage({ onLogin, onSwitchToRegister }) {
     const [email, setEmail] = useState('')
@@ -24,7 +22,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
         setLoading(true)
 
         try {
-            const response = await authApi.login(email, password)
+            const response = await authMethods.login(email, password)
             onLogin(response.access_token, { email })
         } catch (err) {
             setError(err.response?.data?.detail || 'Login failed')
