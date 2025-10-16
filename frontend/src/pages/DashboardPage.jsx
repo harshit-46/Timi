@@ -1,4 +1,116 @@
 import React, { useEffect, useState } from 'react';
+import { CheckCircle, PlusCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+export default function DashboardPage() {
+    const [tasks, setTasks] = useState([]);
+    const [newTask, setNewTask] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const token = localStorage.getItem('token'); // from login
+
+    // Fetch all tasks on mount
+    useEffect(() => {
+        fetchTasks();
+    }, []);
+
+    const fetchTasks = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('http://127.0.0.1:8000/tasks/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) throw new Error('Failed to fetch tasks');
+            const data = await res.json();
+            setTasks(data);
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const addTask = async (e) => {
+        e.preventDefault();
+        if (!newTask.trim()) return toast.error('Task title required');
+        try {
+            const res = await fetch('http://127.0.0.1:8000/tasks/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title: newTask }),
+            });
+            if (!res.ok) throw new Error('Failed to add task');
+            const data = await res.json();
+            setTasks((prev) => [...prev, data]);
+            setNewTask('');
+            toast.success('Task added!');
+        } catch (err) {
+            toast.error(err.message);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-900 text-white p-6">
+            <h1 className="text-3xl font-bold mb-6">Your Dashboard</h1>
+
+            {/* Add Task */}
+            <form onSubmit={addTask} className="flex gap-2 mb-6">
+                <input
+                    type="text"
+                    placeholder="Add a new task..."
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                    className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                    type="submit"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                >
+                    <PlusCircle className="w-5 h-5" /> Add
+                </button>
+            </form>
+
+            {/* Task List */}
+            {loading ? (
+                <p>Loading tasks...</p>
+            ) : tasks.length === 0 ? (
+                <p className="text-gray-400">No tasks yet. Add one!</p>
+            ) : (
+                <div className="space-y-3">
+                    {tasks.map((task) => (
+                        <div
+                            key={task.id}
+                            className="bg-gray-800 p-4 rounded-lg flex items-center justify-between"
+                        >
+                            <div className="flex items-center gap-3">
+                                <CheckCircle
+                                    className={`w-5 h-5 ${task.completed ? 'text-green-500' : 'text-gray-500'
+                                        }`}
+                                />
+                                <span
+                                    className={`${task.completed ? 'line-through text-gray-400' : ''
+                                        }`}
+                                >
+                                    {task.title}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+
+/*
+
+import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -19,7 +131,6 @@ export default function DashboardPage() {
                 setError('');
                 let email = '';
 
-                // Try to get user data from localStorage first (more reliable)
                 try {
                     const userData = localStorage.getItem('user');
                     if (userData) {
@@ -33,7 +144,6 @@ export default function DashboardPage() {
                     localStorage.removeItem('user');
                 }
 
-                // If no email from user data, try token (but be careful)
                 if (!email) {
                     try {
                         const token = localStorage.getItem('token');
@@ -50,7 +160,6 @@ export default function DashboardPage() {
                         }
                     } catch (tokenErr) {
                         console.error('Invalid token in localStorage:', tokenErr);
-                        // Clear corrupted token
                         localStorage.removeItem('token');
                         throw new Error('Authentication failed. Please login again.');
                     }
@@ -95,7 +204,6 @@ export default function DashboardPage() {
         );
     }
 
-    // Show error state with action
     if (error) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -125,15 +233,12 @@ export default function DashboardPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
             <div className="max-w-6xl mx-auto">
-                {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">
                         Welcome back, {userName}! 👋
                     </h1>
-                    <p className="text-gray-600">{userEmail}</p>
                 </div>
 
-                {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white rounded-xl shadow p-6 border-l-4 border-indigo-600">
                         <div className="flex items-center justify-between">
@@ -170,7 +275,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Tasks Section */}
                 <div className="bg-white rounded-xl shadow">
                     <div className="p-6 border-b border-gray-200">
                         <h2 className="text-2xl font-bold text-gray-900">Your Tasks</h2>
@@ -214,7 +318,6 @@ export default function DashboardPage() {
                     )}
                 </div>
 
-                {/* Quick Actions */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 border border-indigo-200">
                         <h3 className="text-lg font-semibold text-indigo-900 mb-2">Productivity Tip</h3>
@@ -233,3 +336,6 @@ export default function DashboardPage() {
         </div>
     );
 }
+
+
+*/
