@@ -16,22 +16,53 @@ export default function DashboardPage() {
     useEffect(() => {
         const initializeDashboard = () => {
             try {
-                const token = localStorage.getItem('token');
-                const userData = localStorage.getItem('user');
+                setError('');
+                let email = '';
 
-                if (token) {
-                    const decoded = jwtDecode(token);
-                    setUserEmail(decoded.sub || decoded.email || 'User');
+                // Try to get user data from localStorage first (more reliable)
+                try {
+                    const userData = localStorage.getItem('user');
+                    if (userData) {
+                        const user = JSON.parse(userData);
+                        email = user.email || '';
+                        setUserName(user.name || user.email?.split('@')[0] || 'User');
+                        setUserEmail(email);
+                    }
+                } catch (parseErr) {
+                    console.error('Failed to parse user data:', parseErr);
+                    localStorage.removeItem('user');
                 }
 
-                if (userData) {
-                    const user = JSON.parse(userData);
-                    setUserName(user.name || user.email?.split('@')[0] || 'User');
-                    setUserEmail(user.email || userEmail);
+                // If no email from user data, try token (but be careful)
+                if (!email) {
+                    try {
+                        const token = localStorage.getItem('token');
+                        if (token && typeof token === 'string' && token.trim()) {
+                            // Validate token format before decoding
+                            if (token.split('.').length === 3) {
+                                const decoded = jwtDecode(token);
+                                email = decoded.sub || decoded.email || 'User';
+                                setUserEmail(email);
+                                setUserName(email.split('@')[0] || 'User');
+                            } else {
+                                throw new Error('Invalid token format');
+                            }
+                        }
+                    } catch (tokenErr) {
+                        console.error('Invalid token in localStorage:', tokenErr);
+                        // Clear corrupted token
+                        localStorage.removeItem('token');
+                        throw new Error('Authentication failed. Please login again.');
+                    }
                 }
+
+                if (!email) {
+                    throw new Error('No user information found. Please login again.');
+                }
+
             } catch (err) {
                 console.error('Dashboard initialization error:', err);
-                setError('Failed to load user information');
+                setError(err.message || 'Failed to load user information');
             } finally {
                 setLoading(false);
             }
@@ -64,6 +95,33 @@ export default function DashboardPage() {
         );
     }
 
+    // Show error state with action
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+                <div className="max-w-md mx-auto mt-20">
+                    <div className="bg-white rounded-xl shadow-lg p-8">
+                        <div className="flex justify-center mb-4">
+                            <AlertCircle className="w-12 h-12 text-red-600" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 text-center mb-2">Authentication Error</h2>
+                        <p className="text-gray-600 text-center mb-6">{error}</p>
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem('token');
+                                localStorage.removeItem('user');
+                                window.location.href = '/login';
+                            }}
+                            className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition"
+                        >
+                            Return to Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
             <div className="max-w-6xl mx-auto">
@@ -74,13 +132,6 @@ export default function DashboardPage() {
                     </h1>
                     <p className="text-gray-600">{userEmail}</p>
                 </div>
-
-                {error && (
-                    <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                        <p className="text-red-700">{error}</p>
-                    </div>
-                )}
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
