@@ -1,28 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import { Box, Container } from '@mui/material'
-
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Header from './components/Header'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#667eea',
-    },
-    secondary: {
-      main: '#764ba2',
-    },
-  },
-})
-
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('login')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -30,7 +16,6 @@ export default function App() {
     if (token && userData) {
       setIsLoggedIn(true)
       setUser(JSON.parse(userData))
-      setCurrentPage('dashboard')
     }
   }, [])
 
@@ -39,7 +24,7 @@ export default function App() {
     localStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)
     setIsLoggedIn(true)
-    setCurrentPage('dashboard')
+    navigate('/dashboard')
   }
 
   const handleRegister = (token, userData) => {
@@ -47,7 +32,7 @@ export default function App() {
     localStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)
     setIsLoggedIn(true)
-    setCurrentPage('dashboard')
+    navigate('/dashboard')
   }
 
   const handleLogout = () => {
@@ -55,38 +40,57 @@ export default function App() {
     localStorage.removeItem('user')
     setUser(null)
     setIsLoggedIn(false)
-    setCurrentPage('login')
+    navigate('/login')
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-        {isLoggedIn && (
-          <Header user={user} onLogout={handleLogout} />
-        )}
-        
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          {!isLoggedIn ? (
-            <>
-              {currentPage === 'login' && (
-                <LoginPage
-                  onLogin={handleLogin}
-                  onSwitchToRegister={() => setCurrentPage('register')}
-                />
-              )}
-              {currentPage === 'register' && (
-                <RegisterPage
-                  onRegister={handleRegister}
-                  onSwitchToLogin={() => setCurrentPage('login')}
-                />
-              )}
-            </>
-          ) : (
-            <DashboardPage />
-          )}
-        </Container>
-      </Box>
-    </ThemeProvider>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {isLoggedIn && <Header user={user} onLogout={handleLogout} />}
+
+      <main className="flex-grow flex justify-center items-center p-6">
+        <div className="w-full max-w-lg bg-white shadow-md rounded-2xl p-8">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                isLoggedIn ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                isLoggedIn ? (
+                  <Navigate to="/dashboard" />
+                ) : (
+                  <LoginPage
+                    onLogin={handleLogin}
+                    onSwitchToRegister={() => navigate('/register')}
+                  />
+                )
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                isLoggedIn ? (
+                  <Navigate to="/dashboard" />
+                ) : (
+                  <RegisterPage
+                    onRegister={handleRegister}
+                    onSwitchToLogin={() => navigate('/login')}
+                  />
+                )
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                isLoggedIn ? <DashboardPage /> : <Navigate to="/login" />
+              }
+            />
+          </Routes>
+        </div>
+      </main>
+    </div>
   )
 }

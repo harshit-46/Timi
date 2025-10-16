@@ -1,7 +1,9 @@
-import React from "react";
-import {jwtDecode} from "jwt-decode";
+import React, { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+    const navigate = useNavigate();
     const token = localStorage.getItem("token");
     let userEmail = "";
 
@@ -14,20 +16,33 @@ const Header = () => {
         }
     }
 
+    useEffect(() => {
+        if (!token) {
+            navigate("/login");
+        }
+    }, [token, navigate]);
+
     const handleLogout = () => {
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
     };
 
+    const initials = userEmail ? userEmail.charAt(0).toUpperCase() : "?";
+
     return (
-        <header className="bg-gray-900 text-white flex justify-between items-center px-6 py-4 shadow-md">
+        <header className="border-b border-gray-800 bg-gray-900 text-white flex flex-col sm:flex-row justify-between items-center px-6 py-4 shadow-md gap-2 sm:gap-4">
             <h1 className="text-xl font-bold">Timi Dashboard</h1>
 
             <div className="flex items-center gap-4">
                 {userEmail && (
-                    <span className="text-sm text-gray-300">
-                        Welcome, <span className="font-semibold">{userEmail}</span>
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 flex items-center justify-center bg-gray-700 rounded-full text-white font-semibold">
+                            {initials}
+                        </div>
+                        <span className="text-sm text-gray-300">
+                            Welcome, <span className="font-semibold">{userEmail}</span>
+                        </span>
+                    </div>
                 )}
                 <button
                     onClick={handleLogout}
