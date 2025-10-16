@@ -30,8 +30,8 @@ const Header = () => {
     const initials = userEmail ? userEmail.charAt(0).toUpperCase() : "?";
 
     return (
-        <header className="border-b border-gray-800 bg-gray-900 text-white flex flex-col sm:flex-row justify-between items-center px-6 py-4 shadow-md gap-2 sm:gap-4">
-            <h1 className="text-xl font-bold">Timi Dashboard</h1>
+        <header className="border-2 border-red-800 bg-gray-900 text-white flex flex-col sm:flex-row justify-between items-center px-6 py-4 shadow-md gap-2 sm:gap-4">
+            <h1 className="text-xl font-bold text-red bg-yellow-600">Timi Dashboard</h1>
 
             <div className="flex items-center gap-4">
                 {userEmail && (
@@ -50,6 +50,9 @@ const Header = () => {
                 >
                     Logout
                 </button>
+            </div>
+            <div>
+                <p className="text-red">This is a paragraph.</p>
             </div>
         </header>
     );
