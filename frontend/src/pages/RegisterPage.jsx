@@ -25,14 +25,8 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
         e.preventDefault();
         setError('');
 
-        // Validation
         if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
             setError('Please fill in all fields');
-            return;
-        }
-
-        if (!email.includes('@')) {
-            setError('Please enter a valid email address');
             return;
         }
 
@@ -49,21 +43,30 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
         setLoading(true);
 
         try {
-            // Simulate API call (replace with actual authMethods.register)
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            const mockResponse = { 
-                access_token: 'mock_token_' + Math.random(),
-                user: { email } 
-            };
-            
-            onRegister?.(mockResponse.access_token, { email });
+            const response = await fetch('http://localhost:8000/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Registration failed');
+            }
+
+            const data = await response.json();
+
+            // Pass real token to parent
+            onRegister?.(data.access_token, data.user);
         } catch (err) {
-            setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+            setError(err.message);
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-4 relative overflow-hidden">
