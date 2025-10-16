@@ -7,7 +7,6 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,33 +26,43 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
         setLoading(true);
 
         try {
-            // Simulate API call (replace with actual authMethods.login)
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const mockResponse = { 
-                access_token: 'mock_token_' + Math.random(),
-                user: { email } 
-            };
-            
-            if (rememberMe) {
-                localStorage.setItem('rememberedEmail', email);
+            // Call your actual backend API
+            const response = await fetch('http://localhost:8000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Invalid email or password');
             }
+
+            const data = await response.json();
             
-            onLogin?.(mockResponse.access_token, { email });
+            // Validate that we got a token
+            if (!data.access_token) {
+                throw new Error('No authentication token received');
+            }
+
+            onLogin?.(data.access_token, { email });
         } catch (err) {
-            setError(err.response?.data?.detail || err.message || 'Login failed. Please try again.');
+            console.error('Login error:', err);
+            setError(err.message || 'Login failed. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen w-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-4 relative overflow-hidden">
+        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-4 relative overflow-hidden">
             {/* Animated background elements */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
             
-            <div className="w-full max-w-md relative z-10">
+            <div className="w-full max-w-sm relative z-10">
                 <div className="bg-white rounded-2xl shadow-2xl p-8">
                     {/* Logo/Title */}
                     <div className="text-center mb-8">
@@ -72,7 +81,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                     )}
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-4">
                         {/* Email Field */}
                         <div className="relative">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -123,8 +132,6 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                             <input
                                 type="checkbox"
                                 id="rememberMe"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
                                 disabled={loading}
                                 className="w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                             />
@@ -135,7 +142,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
 
                         {/* Submit Button */}
                         <button
-                            type="submit"
+                            onClick={handleSubmit}
                             disabled={loading}
                             className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                         >
@@ -148,7 +155,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                                 'Login'
                             )}
                         </button>
-                    </form>
+                    </div>
 
                     {/* Divider */}
                     <div className="my-6 flex items-center gap-4">
@@ -166,11 +173,10 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                         Create an account
                     </button>
 
-                    {/* Demo Credentials */}
-                    <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-gray-600">
-                        <p className="font-semibold text-amber-900 mb-1">Demo Login:</p>
-                        <p><span className="text-gray-700">Email:</span> demo@example.com</p>
-                        <p><span className="text-gray-700">Password:</span> password123</p>
+                    {/* Demo Info */}
+                    <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-gray-600">
+                        <p className="font-semibold text-blue-900 mb-1">Testing:</p>
+                        <p>Use your registered email and password to login</p>
                     </div>
                 </div>
 
