@@ -1,8 +1,6 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables"""
-    
     # Database
     DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/timi_db"
     DB_USER: str = "postgres"
