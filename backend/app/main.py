@@ -51,6 +51,7 @@ security = HTTPBearer()
 
 # ----------------------- Pydantic Models -----------------------
 class RegisterRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100, description="User's display name")
     email: EmailStr
     password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
 
@@ -123,7 +124,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
     # Hash password and create new user
     hashed_password = hash_password(req.password)
-    new_user = User(email=req.email, password_hash=hashed_password)
+    new_user = User(email=req.email, password_hash=hashed_password, name=req.name)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

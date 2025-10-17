@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { use, useReducer, useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function RegisterPage({ onRegister, onSwitchToLogin }) {
+    const [username, setUserName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -48,7 +49,7 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password, name: username })
             });
 
             if (!response.ok) {
@@ -94,6 +95,21 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
 
                     {/* Form */}
                     <div className="space-y-4">
+                        {/* Username Field */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="John Henry"
+                                    value={username}
+                                    onChange={(e) => setUserName(e.target.value)}
+                                    disabled={loading}
+                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:bg-gray-50"
+                                />
+                            </div>
+                        </div>
                         {/* Email Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -253,23 +269,7 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
                     >
                         Back to Login
                     </button>
-
-                    {/* Benefits */}
-                    <div className="mt-6 space-y-2 text-xs text-gray-600">
-                        <p className="font-semibold text-gray-700">Why join Timi?</p>
-                        <ul className="space-y-1">
-                            <li>✨ Create and manage tasks effortlessly</li>
-                            <li>📊 Track your progress in real-time</li>
-                            <li>🎯 AI-powered task optimization</li>
-                            <li>⚡ Achieve your goals faster</li>
-                        </ul>
-                    </div>
                 </div>
-
-                {/* Footer */}
-                <p className="text-center text-white text-xs mt-6 opacity-90">
-                    © 2024 Timi AI. All rights reserved.
-                </p>
             </div>
         </div>
     );
