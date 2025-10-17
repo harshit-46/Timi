@@ -1,5 +1,5 @@
-import React, { use, useReducer, useState } from 'react';
-import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle, User } from 'lucide-react';
 
 export default function RegisterPage({ onRegister, onSwitchToLogin }) {
     const [username, setUserName] = useState('');
@@ -43,13 +43,19 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
 
         setLoading(true);
 
+        const body = {
+            name: username,
+            email,
+            password
+        };
+
         try {
             const response = await fetch('http://localhost:8000/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password, name: username })
+                body: JSON.stringify(body)
             });
 
             if (!response.ok) {
@@ -59,7 +65,9 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
 
             const data = await response.json();
 
-            // Pass real token to parent
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
             onRegister?.(data.access_token, data.user);
         } catch (err) {
             setError(err.message);
@@ -99,7 +107,7 @@ export default function RegisterPage({ onRegister, onSwitchToLogin }) {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
                                     type="text"
                                     placeholder="John Henry"

@@ -132,7 +132,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     token = create_access_token(req.email)
     logger.info(f"New user registered: {req.email}")
 
-    return {"access_token": token, "token_type": "bearer", "user": {"email": req.email}}
+    return {"access_token": token, "token_type": "bearer", "user": {"name" : new_user.name,"email": new_user.email}}
 
 @app.post("/login", response_model=TokenResponse, tags=["Auth"])
 def login(req: LoginRequest, db: Session = Depends(get_db)):
@@ -144,7 +144,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     token = create_access_token(req.email)
     logger.info(f"User logged in: {req.email}")
 
-    return {"access_token": token, "token_type": "bearer", "user": {"email": req.email}}
+    return {"access_token": token, "token_type": "bearer", "user": {"name" : user.name,"email": user.email}}
 
 @app.get("/me", response_model=UserResponse, tags=["User"])
 def get_current_user(email: str = Depends(verify_token), db: Session = Depends(get_db)):

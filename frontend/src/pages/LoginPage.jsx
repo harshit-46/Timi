@@ -47,7 +47,10 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                 throw new Error('No authentication token received');
             }
 
-            onLogin?.(data.access_token, { email });
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            onLogin?.(data.access_token, data.user);
         } catch (err) {
             console.error('Login error:', err);
             setError(err.message || 'Login failed. Please try again.');
