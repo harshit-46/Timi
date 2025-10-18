@@ -84,7 +84,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                     )}
 
                     {/* Form */}
-                    <div className="space-y-4">
+                    <form className="space-y-4">
                         {/* Email Field */}
                         <div className="relative">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -145,6 +145,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
 
                         {/* Submit Button */}
                         <button
+                            type="submit"
                             onClick={handleSubmit}
                             disabled={loading}
                             className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
@@ -158,7 +159,7 @@ export default function LoginPage({ onLogin, onSwitchToRegister }) {
                                 'Login'
                             )}
                         </button>
-                    </div>
+                    </form>
 
                     {/* Divider */}
                     <div className="my-6 flex items-center gap-4">
